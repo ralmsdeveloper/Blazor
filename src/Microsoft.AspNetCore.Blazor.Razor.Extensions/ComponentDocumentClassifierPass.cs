@@ -105,7 +105,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
             var builder = new StringBuilder();
             builder.Append(baseNamespace); // Don't sanitize, we expect it to contain dots.
-
+            
             var segments = relativePath.Split(PathSeparators, StringSplitOptions.RemoveEmptyEntries);
 
             // Skip the last segment because it's the FileName.
