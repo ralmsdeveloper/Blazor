@@ -12,12 +12,12 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
 {
     internal class ClientFileProvider : CompositeMountedFileProvider
     {
-        public ClientFileProvider(string clientAssemblyPath, string webRootPath)
-            : base(GetContents(clientAssemblyPath, webRootPath))
+        public ClientFileProvider(string clientAssemblyPath, string webRootPath, string reloadUri)
+            : base(GetContents(clientAssemblyPath, webRootPath, reloadUri))
         {
         }
 
-        private static (string, IFileProvider)[] GetContents(string clientAssemblyPath, string webRootPath)
+        private static (string, IFileProvider)[] GetContents(string clientAssemblyPath, string webRootPath, string reloadUri)
         {
             var fileProviders = new List<(string, IFileProvider)>();
 
@@ -33,8 +33,11 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
             // The web root directory is optional. If it exists and contains /index.html, then
             // we will inject the relevant <script> tag and supply that file. Otherwise, we just
             // don't supply an /index.html file.
+            // Likewise, the reload URI is optional. If it's nonempty, then it gets added as a
+            // config option on the <script> tag so the client-side code knows to connect to it.
             if (TryCreateIndexHtmlFileProvider(
-                webRootPath, clientAssemblyPath, frameworkFileProvider, out var indexHtmlFileProvider))
+                webRootPath, clientAssemblyPath, reloadUri,
+                frameworkFileProvider, out var indexHtmlFileProvider))
             {
                 fileProviders.Add(("/", indexHtmlFileProvider));
             }
@@ -43,7 +46,8 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
         }
 
         private static bool TryCreateIndexHtmlFileProvider(
-            string webRootPath, string assemblyPath, IFileProvider frameworkFileProvider, out IFileProvider result)
+            string webRootPath, string assemblyPath, string reloadUri,
+            IFileProvider frameworkFileProvider, out IFileProvider result)
         {
             if (!string.IsNullOrEmpty(webRootPath))
             {
@@ -54,7 +58,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
                     var assemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
                     var assemblyEntryPoint = GetAssemblyEntryPoint(assemblyPath);
                     var binFiles = frameworkFileProvider.GetDirectoryContents("/_bin");
-                    result = new IndexHtmlFileProvider(template, assemblyName, assemblyEntryPoint, binFiles);
+                    result = new IndexHtmlFileProvider(template, assemblyName, assemblyEntryPoint, reloadUri, binFiles);
                     return true;
                 }
             }

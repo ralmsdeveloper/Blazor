@@ -16,6 +16,9 @@ namespace Microsoft.AspNetCore.Blazor.Build.Cli.Commands
             var webRootPath = command.Option("--webroot",
                 "Specifies the path to the directory containing static files to be served",
                 CommandOptionType.SingleValue);
+            var reloadUri = command.Option("--reload-uri",
+                "If specified, enables live reloading and specifies the URI of the notification endpoint.",
+                CommandOptionType.SingleValue);
 
             command.OnExecute(() =>
             {
@@ -28,7 +31,10 @@ namespace Microsoft.AspNetCore.Blazor.Build.Cli.Commands
                 try
                 {
                     Console.WriteLine($"Building Blazor app from {clientAssemblyPath.Value}...");
-                    AppBuilder.Execute(clientAssemblyPath.Value, webRootPath.HasValue() ? webRootPath.Value() : null);
+                    AppBuilder.Execute(
+                        clientAssemblyPath.Value,
+                        webRootPath.HasValue() ? webRootPath.Value() : null,
+                        reloadUri.HasValue() ? reloadUri.Value() : null);
                     return 0;
                 }
                 catch (Exception ex)

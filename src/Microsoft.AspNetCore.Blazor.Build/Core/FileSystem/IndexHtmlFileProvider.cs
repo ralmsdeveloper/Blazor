@@ -19,7 +19,8 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
             string htmlTemplate,
             string assemblyName,
             string assemblyEntryPoint,
-            IEnumerable<IFileInfo> binFiles) : base(ComputeContents(htmlTemplate, assemblyName, assemblyEntryPoint, binFiles))
+            string reloadUri,
+            IEnumerable<IFileInfo> binFiles) : base(ComputeContents(htmlTemplate, assemblyName, assemblyEntryPoint, reloadUri, binFiles))
         {
         }
 
@@ -27,11 +28,12 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
             string htmlTemplate,
             string assemblyName,
             string assemblyEntryPoint,
+            string reloadUri,
             IEnumerable<IFileInfo> binFiles)
         {
             if (htmlTemplate != null)
             {
-                var html = GetIndexHtmlContents(htmlTemplate, assemblyName, assemblyEntryPoint, binFiles);
+                var html = GetIndexHtmlContents(htmlTemplate, assemblyName, assemblyEntryPoint, reloadUri, binFiles);
                 var htmlBytes = Encoding.UTF8.GetBytes(html);
                 yield return ("/index.html", htmlBytes);
             }
@@ -59,6 +61,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
             string htmlTemplate,
             string assemblyName,
             string assemblyEntryPoint,
+            string reloadUri,
             IEnumerable<IFileInfo> binFiles)
         {
             var resultBuilder = new StringBuilder();
@@ -98,6 +101,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
                                     resultBuilder,
                                     assemblyName,
                                     assemblyEntryPoint,
+                                    reloadUri,
                                     binFiles,
                                     tag.Attributes);
 
@@ -136,6 +140,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
             StringBuilder resultBuilder,
             string assemblyName,
             string assemblyEntryPoint,
+            string reloadUri,
             IEnumerable<IFileInfo> binFiles,
             List<KeyValuePair<string, string>> attributes)
         {
@@ -151,6 +156,11 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core.FileSystem
             attributesDict["main"] = assemblyNameWithExtension;
             attributesDict["entrypoint"] = assemblyEntryPoint;
             attributesDict["references"] = referencesAttribute;
+
+            if (!string.IsNullOrEmpty(reloadUri))
+            {
+                attributesDict["reload"] = reloadUri;
+            }
 
             resultBuilder.Append("<script");
             foreach (var attributePair in attributesDict)

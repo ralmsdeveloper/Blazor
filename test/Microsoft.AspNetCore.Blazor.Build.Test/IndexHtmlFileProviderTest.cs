@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Blazor.Server.Test
         {
             // Arrange
             var instance = new IndexHtmlFileProvider(
-                null, "fakeassembly", "MyNamespace.MyType::MyMethod", Enumerable.Empty<IFileInfo>());
+                null, "fakeassembly", "MyNamespace.MyType::MyMethod", "/reload", Enumerable.Empty<IFileInfo>());
 
             // Act
             var file = instance.GetFileInfo("/index.html");
@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Blazor.Server.Test
             // Arrange
             var htmlTemplate = "test";
             var instance = new IndexHtmlFileProvider(
-                htmlTemplate, "fakeassembly", "MyNamespace.MyType::MyMethod", Enumerable.Empty<IFileInfo>());
+                htmlTemplate, "fakeassembly", "MyNamespace.MyType::MyMethod", "/reload", Enumerable.Empty<IFileInfo>());
 
             // Act
             var file = instance.GetFileInfo("/index.html");
@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.Blazor.Server.Test
             // Arrange
             var htmlTemplate = "test";
             var instance = new IndexHtmlFileProvider(
-                htmlTemplate, "fakeassembly", "MyNamespace.MyType::MyMethod", Enumerable.Empty<IFileInfo>());
+                htmlTemplate, "fakeassembly", "MyNamespace.MyType::MyMethod", "/reload", Enumerable.Empty<IFileInfo>());
 
             // Act
             var directory = instance.GetDirectoryContents(string.Empty);
@@ -86,7 +86,7 @@ namespace Microsoft.AspNetCore.Blazor.Server.Test
                 new TestFileInfo("MyApp.ClassLib.dll"),
             };
             var instance = new IndexHtmlFileProvider(
-                htmlTemplate, "MyApp.Entrypoint", "MyNamespace.MyType::MyMethod", dependencies);
+                htmlTemplate, "MyApp.Entrypoint", "MyNamespace.MyType::MyMethod", "/my/reload", dependencies);
 
             // Act
             var file = instance.GetFileInfo("/index.html");
@@ -105,9 +105,29 @@ namespace Microsoft.AspNetCore.Blazor.Server.Test
             Assert.Equal("MyApp.Entrypoint.dll", scriptElem.GetAttribute("main"));
             Assert.Equal("MyNamespace.MyType::MyMethod", scriptElem.GetAttribute("entrypoint"));
             Assert.Equal("System.Abc.dll,MyApp.ClassLib.dll", scriptElem.GetAttribute("references"));
+            Assert.Equal("/my/reload", scriptElem.GetAttribute("reload"));
             Assert.False(scriptElem.HasAttribute("type"));
             Assert.Equal(string.Empty, scriptElem.Attributes["custom1"].Value);
             Assert.Equal("value", scriptElem.Attributes["custom2"].Value);
+        }
+
+        [Fact]
+        public void OmitsReloadAttributeIfNoReloadUriSpecified()
+        {
+            // Arrange
+            var htmlTemplate = "<script type='blazor-boot'></script>";
+            var instance = new IndexHtmlFileProvider(
+                htmlTemplate, "MyApp.Entrypoint", "MyNamespace.MyType::MyMethod",
+                /* reloadUri */ null, /* dependencies */ new IFileInfo[] { new TestFileInfo("System.Abc.dll") });
+
+            // Act
+            var file = instance.GetFileInfo("/index.html");
+            var fileContents = ReadString(file);
+
+            // Assert
+            var parsedHtml = new HtmlParser().Parse(fileContents);
+            var scriptElem = parsedHtml.Body.QuerySelector("script");
+            Assert.False(scriptElem.HasAttribute("reload"));
         }
 
         [Fact]
@@ -121,7 +141,7 @@ namespace Microsoft.AspNetCore.Blazor.Server.Test
                 new TestFileInfo("MyApp.ClassLib.dll"),
             };
             var instance = new IndexHtmlFileProvider(
-                htmlTemplate, "MyApp.Entrypoint", "MyNamespace.MyType::MyMethod", dependencies);
+                htmlTemplate, "MyApp.Entrypoint", "MyNamespace.MyType::MyMethod", "/reload", dependencies);
 
             // Act
             var file = instance.GetFileInfo("/index.html");

@@ -12,9 +12,9 @@ namespace Microsoft.AspNetCore.Blazor.Build.Core
         // Keep in sync with the const in Microsoft.AspNetCore.Blazor.Server's LiveReloading.cs
         const string BlazorBuildCompletedSignalFile = "__blazorBuildCompleted";
 
-        internal static void Execute(string assemblyPath, string webRootPath)
+        internal static void Execute(string assemblyPath, string webRootPath, string reloadUri)
         {
-            var clientFileSystem = new ClientFileProvider(assemblyPath, webRootPath);
+            var clientFileSystem = new ClientFileProvider(assemblyPath, webRootPath, reloadUri);
             var distDirPath = Path.Combine(Path.GetDirectoryName(assemblyPath), "dist");
             FileUtil.WriteFileProviderToDisk(clientFileSystem, distDirPath, clean: true);
             WriteBuildCompletedSignal(distDirPath);
