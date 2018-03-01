@@ -85,7 +85,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorHosted.CSharp.Client"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorHosted.CSharp.Server", "src\Microsoft.AspNetCore.Blazor.Templates\content\BlazorHosted.CSharp\BlazorHosted.CSharp.Server\BlazorHosted.CSharp.Server.csproj", "{78ED9932-0912-4F36-8F82-33DE850E7A33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorHosted.CSharp.Shared", "src\Microsoft.AspNetCore.Blazor.Templates\content\BlazorHosted.CSharp\BlazorHosted.CSharp.Shared\BlazorHosted.CSharp.Shared.csproj", "{F3E02B21-1127-431A-B832-0E53CB72097B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorHosted.CSharp.Shared", "src\Microsoft.AspNetCore.Blazor.Templates\content\BlazorHosted.CSharp\BlazorHosted.CSharp.Shared\BlazorHosted.CSharp.Shared.csproj", "{F3E02B21-1127-431A-B832-0E53CB72097B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveReloadTestApp", "test\testapps\LiveReloadTestApp\LiveReloadTestApp.csproj", "{0246AA77-1A27-4A67-874B-6EF6F99E414E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -209,6 +211,10 @@ Global
 		{F3E02B21-1127-431A-B832-0E53CB72097B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3E02B21-1127-431A-B832-0E53CB72097B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3E02B21-1127-431A-B832-0E53CB72097B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0246AA77-1A27-4A67-874B-6EF6F99E414E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0246AA77-1A27-4A67-874B-6EF6F99E414E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0246AA77-1A27-4A67-874B-6EF6F99E414E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0246AA77-1A27-4A67-874B-6EF6F99E414E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -249,6 +255,7 @@ Global
 		{7549444A-9C81-44DE-AD0D-2C55501EAAC7} = {73DA1DFD-79F0-4BA2-B0B6-4F3A21D2C3F8}
 		{78ED9932-0912-4F36-8F82-33DE850E7A33} = {73DA1DFD-79F0-4BA2-B0B6-4F3A21D2C3F8}
 		{F3E02B21-1127-431A-B832-0E53CB72097B} = {73DA1DFD-79F0-4BA2-B0B6-4F3A21D2C3F8}
+		{0246AA77-1A27-4A67-874B-6EF6F99E414E} = {4AE0D35B-D97A-44D0-8392-C9240377DCCE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {504DA352-6788-4DC0-8705-82167E72A4D3}
