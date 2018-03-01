@@ -126,7 +126,7 @@ namespace Microsoft.AspNetCore.Blazor.Server.Test
 
             // Assert
             var parsedHtml = new HtmlParser().Parse(fileContents);
-            var scriptElem = parsedHtml.Body.QuerySelector("script");
+            var scriptElem = parsedHtml.QuerySelector("script");
             Assert.False(scriptElem.HasAttribute("reload"));
         }
 
