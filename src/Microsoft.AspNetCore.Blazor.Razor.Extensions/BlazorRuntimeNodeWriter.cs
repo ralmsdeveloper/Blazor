@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
     /// <summary>
     /// Generates the C# code corresponding to Razor source document contents.
     /// </summary>
-    internal class BlazorIntermediateNodeWriter : IntermediateNodeWriter
+    internal class BlazorRuntimeNodeWriter : BlazorNodeWriter
     {
         // Per the HTML spec, the following elements are inherently self-closing
         // For example, <img> is the same as <img /> (and therefore it cannot contain descendants)
@@ -43,16 +43,6 @@ namespace Microsoft.AspNetCore.Blazor.Razor
         private struct PendingAttributeToken
         {
             public IntermediateToken AttributeValue;
-        }
-
-        public override void BeginWriterScope(CodeRenderingContext context, string writer)
-        {
-            throw new System.NotImplementedException(nameof(BeginWriterScope));
-        }
-
-        public override void EndWriterScope(CodeRenderingContext context)
-        {
-            throw new System.NotImplementedException(nameof(EndWriterScope));
         }
 
         public override void WriteCSharpCode(CodeRenderingContext context, CSharpCodeIntermediateNode node)
@@ -363,6 +353,117 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             }
         }
 
+        public override void WriteUsingDirective(CodeRenderingContext context, UsingDirectiveIntermediateNode node)
+        {
+            context.CodeWriter.WriteUsing(node.Content, endLine: true);
+        }
+
+        public override void WriteComponentOpen(CodeRenderingContext context, ComponentOpenExtensionNode node)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            // The start tag counts as a child from a markup point of view.
+            _scopeStack.IncrementCurrentScopeChildCount(context);
+
+            // builder.OpenComponent<TComponent>(42);
+            context.CodeWriter.Write(_scopeStack.BuilderVarName);
+            context.CodeWriter.Write(".");
+            context.CodeWriter.Write(BlazorApi.RenderTreeBuilder.OpenComponent);
+            context.CodeWriter.Write("<");
+            context.CodeWriter.Write(node.TypeName);
+            context.CodeWriter.Write(">(");
+            context.CodeWriter.Write((_sourceSequence++).ToString());
+            context.CodeWriter.Write(");");
+            context.CodeWriter.WriteLine();
+        }
+
+        public override void WriteComponentClose(CodeRenderingContext context, ComponentCloseExtensionNode node)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            // The close tag counts as a child from a markup point of view.
+            _scopeStack.IncrementCurrentScopeChildCount(context);
+
+            // builder.OpenComponent<TComponent>(42);
+            context.CodeWriter.Write(_scopeStack.BuilderVarName);
+            context.CodeWriter.Write(".");
+            context.CodeWriter.Write(BlazorApi.RenderTreeBuilder.CloseComponent);
+            context.CodeWriter.Write("();");
+            context.CodeWriter.WriteLine();
+        }
+
+        public override void WriteComponentBody(CodeRenderingContext context, ComponentBodyExtensionNode node)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            _scopeStack.OpenScope(node.TagName, isComponent: true);
+            context.RenderChildren(node);
+            _scopeStack.CloseScope(context, node.TagName, isComponent: true, source: node.Source);
+        }
+
+        public override void WriteComponentAttribute(CodeRenderingContext context, ComponentAttributeExtensionNode node)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            // builder.OpenComponent<TComponent>(42);
+            context.CodeWriter.Write(_scopeStack.BuilderVarName);
+            context.CodeWriter.Write(".");
+            context.CodeWriter.Write(BlazorApi.RenderTreeBuilder.AddAttribute);
+            context.CodeWriter.Write("(");
+            context.CodeWriter.Write((_sourceSequence++).ToString());
+            context.CodeWriter.Write(", ");
+            context.CodeWriter.WriteStringLiteral(node.AttributeName);
+            context.CodeWriter.Write(", ");
+
+            if (node.AttributeStructure == AttributeStructure.Minimized)
+            {
+                // Minimized attributes always map to 'true'
+                context.CodeWriter.Write("true");
+            }
+            else
+            {
+                // We only support a single token of either HTML or C#.
+                context.CodeWriter.Write(((IntermediateToken)node.Children[0]).Content);
+
+            }
+
+            context.RenderChildren(node);
+            context.CodeWriter.Write(");");
+            context.CodeWriter.WriteLine();
+        }
+
         private SourceSpan? CalculateSourcePosition(
             SourceSpan? razorTokenPosition,
             TextPosition htmlNodePosition)
@@ -432,11 +533,6 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                 .WriteParameterSeparator()
                 .WriteStringLiteral(key)
                 .WriteParameterSeparator();
-        }
-
-        public override void WriteUsingDirective(CodeRenderingContext context, UsingDirectiveIntermediateNode node)
-        {
-            context.CodeWriter.WriteUsing(node.Content, endLine: true);
         }
 
         private static string GetContent(HtmlContentIntermediateNode node)

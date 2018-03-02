@@ -145,13 +145,13 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                         continue;
                     }
 
-                    var kind = PropertyKind.Default;
                     if (properties.ContainsKey(property.Name))
                     {
                         // Not visible
-                        kind = PropertyKind.Ignored;
+                        continue;
                     }
 
+                    var kind = PropertyKind.Default;
                     if (property.Parameters.Length != 0)
                     {
                         // Indexer

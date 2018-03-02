@@ -9,12 +9,19 @@
     <!-- Passed to Razor tasks and loaded as a plugin -->
     <_BlazorAngleSharpAssemblyPath>$(MSBuildThisFileDirectory)../tools/Microsoft.AspNetCore.Blazor.AngleSharp.dll</_BlazorAngleSharpAssemblyPath>
     <_BlazorExtensionAssemblyPath>$(MSBuildThisFileDirectory)../tools/Microsoft.AspNetCore.Blazor.Razor.Extensions.dll</_BlazorExtensionAssemblyPath>
+
+    <RazorDefaultConfiguration>Blazor-0.1</RazorDefaultConfiguration>
   </PropertyGroup>
 
   <!-- Something quick for input/output tracking - the assumptions here should match what the CLI does -->
   <ItemGroup>
     <BlazorGenerate Include="**\*.cshtml" />
+    <Content Update="@(Content->WithMetadataValue('Extension', '.cshtml'))">
+      <Generator>MSBuild:BlazorGenerateDeclaration</Generator>
+    </Content>
 
+    <ProjectCapability Include="DotNetCoreRazorConfiguration" />
+    
     <RazorConfiguration Include="Blazor-0.1">
       <Extensions>Blazor-0.1;Blazor.AngleSharp-0.1;$(CustomRazorExtension)</Extensions>
     </RazorConfiguration>
@@ -40,16 +47,6 @@
          it will skip the build entirely if you only changed html/cshtml files. -->
     <UpToDateCheckInput Include="$(ProjectDir)**\*.cshtml" />
     <UpToDateCheckInput Include="$(ProjectDir)**\*.html" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- 
-      Instruct VS to re-run the target when input files change. Other IDEs may not honor this
-      and therefore developers may need to rebuild after changing cshtml files. 
-    -->
-    <Compile Update="**\*.cshtml">
-      <Generator>MSBuild:BlazorGenerateDeclaration</Generator>
-    </Compile>
   </ItemGroup>
 
   <PropertyGroup>
@@ -99,8 +96,14 @@
       </BlazorGenerateWithTargetPath>
     </ItemGroup>
 
+    <!-- 
+      Instruct VS to re-run the target when input files change. Other IDEs may not honor this
+      and therefore developers may need to rebuild after changing cshtml files. 
+    -->
     <ItemGroup>
-      <BlazorDeclaration Include="@(BlazorGenerateWithTargetPath->'%(GeneratedDeclaration)')" />
+      <BlazorDeclaration Include="@(BlazorGenerateWithTargetPath->'%(GeneratedDeclaration)')">
+        <DependentUpon>%(Identity)</DependentUpon>
+      </BlazorDeclaration>
     </ItemGroup>
     <ItemGroup>
       <BlazorDefinition Include="@(BlazorGenerateWithTargetPath->'%(GeneratedDefinition)')" />
